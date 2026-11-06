@@ -1,0 +1,2600 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>IP INTELLIGENCE · PREMIUM DASHBOARD</title>
+  <!-- Global Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <!-- Visualization Libraries -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --primary: #22c55e;
+      --primary-glow: rgba(34, 197, 94, 0.4);
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.4);
+      --bg-dark: #020617;
+      --glass-bg: rgba(15, 23, 42, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-premium: #f8fafc;
+      --text-dim: #94a3b8;
+      --card-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+    }
+
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+      background: var(--bg-dark);
+      background-image:
+        radial-gradient(at 0% 0%, rgba(34, 197, 94, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
+      color: var(--text-premium);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .shell {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+
+    /* Enhanced Top bar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 16px 24px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: conic-gradient(from 210deg, #22c55e, #2563eb, #0ea5e9, #22c55e);
+      box-shadow: 0 8px 32px rgba(14, 165, 233, 0.15), inset 0 -8px 24px rgba(2, 6, 23, 0.25);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform, box-shadow;
+      animation: logo-pulse 4s infinite ease-in-out;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-logo::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+      transform: rotate(30deg);
+    }
+
+    @keyframes logo-pulse {
+
+      0%,
+      100% {
+        transform: translateY(0) scale(1);
+      }
+
+      50% {
+        transform: translateY(-4px) scale(1.04);
+      }
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      font-size: 20px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #e5e7eb, #9ca3af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+    }
+
+    .top-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+    }
+
+    .top-meta .ts {
+      font-weight: 600;
+      color: #cfeffd;
+      font-size: 13px;
+      padding: 6px 12px;
+      background: rgba(14, 165, 233, 0.1);
+      border-radius: 8px;
+      border: 1px solid rgba(14, 165, 233, 0.2);
+    }
+
+    /* Glassmorphism Cards */
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 32px;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      margin-bottom: 32px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--card-gradient);
+      pointer-events: none;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+    }
+
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #e5e7eb, #9ca3af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      max-width: 600px;
+    }
+
+    /* Enhanced Input area */
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #cbd5f5;
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      margin-top: 6px;
+      border-radius: 14px;
+      border: 1.5px solid #1f2937;
+      padding: 16px;
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 140px;
+      outline: none;
+      background: rgba(15, 23, 42, 0.95);
+      color: #f9fafb;
+      transition: all 0.3s ease;
+      line-height: 1.6;
+    }
+
+    textarea::placeholder {
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    textarea:focus {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-top: 16px;
+      font-size: 13px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+
+    .file-btn {
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text-primary);
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1.5px solid rgba(148, 163, 184, 0.25);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .file-btn:hover {
+      box-shadow: 0 8px 24px rgba(2, 6, 23, 0.7);
+      transform: translateY(-2px);
+      border-color: rgba(148, 163, 184, 0.4);
+    }
+
+    .file-btn::before {
+      content: '📁';
+      font-size: 14px;
+    }
+
+    .file-btn.active {
+      background: linear-gradient(90deg, #16a34a, #06b6d4);
+      color: #031029;
+      border-color: rgba(10, 120, 80, 0.9);
+      box-shadow: 0 12px 40px rgba(6, 182, 149, 0.2);
+      transform: translateY(-3px);
+    }
+
+    .file-wrapper.active .file-name {
+      color: #dfffe8;
+      font-weight: 500;
+    }
+
+    .file-name {
+      font-size: 13px;
+      color: var(--text-secondary);
+      max-width: 400px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 6px 12px;
+      background: rgba(148, 163, 184, 0.08);
+      border-radius: 8px;
+    }
+
+    /* Enhanced Buttons */
+    button {
+      border-radius: 12px;
+      padding: 12px 20px;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform, box-shadow;
+      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.6s;
+    }
+
+    button:hover::after {
+      left: 100%;
+    }
+
+    button:focus {
+      outline: 2px solid rgba(99, 102, 241, 0.2);
+      outline-offset: 4px;
+    }
+
+    button.primary {
+      background: var(--primary-gradient);
+      color: #ffffff;
+      font-weight: 700;
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.2);
+      padding: 14px 24px;
+    }
+
+
+    button.primary:hover:not(:disabled) {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 24px 60px rgba(16, 185, 129, 0.3);
+    }
+
+    button.secondary {
+      background: var(--secondary-gradient);
+      color: var(--text-primary);
+      border: 1.5px solid rgba(148, 163, 184, 0.25);
+      padding: 12px 20px;
+      box-shadow: 0 8px 24px rgba(2, 6, 23, 0.4);
+    }
+
+    button.secondary:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(2, 6, 23, 0.6);
+      border-color: rgba(148, 163, 184, 0.4);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    button i {
+      font-style: normal;
+      font-size: 16px;
+    }
+
+    .error {
+      color: #fca5a5;
+      font-size: 13px;
+      margin-top: 8px;
+      padding: 10px 14px;
+      background: rgba(252, 165, 165, 0.1);
+      border-radius: 10px;
+      border: 1px solid rgba(252, 165, 165, 0.2);
+      display: none;
+    }
+
+    .error.show {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Enhanced Stat cards */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 900px) {
+      .stats-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 600px) {
+      .stats-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stat-card {
+      border-radius: 20px;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #22c55e, #2563eb);
+    }
+
+    .stat-card:nth-child(2)::before {
+      background: linear-gradient(90deg, #f97316, #eab308);
+    }
+
+    .stat-card:nth-child(3)::before {
+      background: linear-gradient(90deg, #8b5cf6, #06b6d4);
+    }
+
+    .stat-card:nth-child(4)::before {
+      background: linear-gradient(90deg, #ef4444, #ec4899);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(148, 163, 184, 0.6);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      margin: 4px 0;
+    }
+
+    .stat-pill {
+      font-size: 11px;
+      color: #a5b4fc;
+      padding: 4px 10px;
+      background: rgba(165, 180, 252, 0.1);
+      border-radius: 999px;
+      display: inline-block;
+      width: fit-content;
+    }
+
+    /* Enhanced Results layout */
+    .results-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2.5fr) minmax(300px, 1fr);
+      gap: 24px;
+      margin-top: 20px;
+    }
+
+    /* Visualization Styles */
+    .viz-row {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 24px;
+      margin-top: 32px;
+      margin-bottom: 32px;
+    }
+
+    .viz-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 24px;
+      height: 400px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .viz-card-header {
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .viz-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    #map {
+      flex: 1;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 1;
+    }
+
+    /* Filter Bar Styles */
+    .filter-bar {
+      display: flex;
+      gap: 16px;
+      margin: 24px 0;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .filter-bar input,
+    .filter-bar select {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .filter-bar input {
+      flex: 1;
+    }
+
+    .filter-bar input:focus,
+    .filter-bar select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-glow);
+    }
+
+
+    /* Abuse Score Styles */
+    .abuse-cell {
+      min-width: 85px;
+    }
+
+    .abuse-loading {
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    .abuse-na {
+      color: #4b5563;
+      font-size: 12px;
+    }
+
+    .abuse-score-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .abuse-score-num {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .abuse-bar {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .abuse-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .abuse-clean .abuse-score-num {
+      color: #4ade80;
+    }
+
+    .abuse-clean .abuse-fill {
+      background: #22c55e;
+    }
+
+    .abuse-medium .abuse-score-num {
+      color: #fbbf24;
+    }
+
+    .abuse-medium .abuse-fill {
+      background: #f59e0b;
+    }
+
+    .abuse-high .abuse-score-num {
+      color: #f87171;
+    }
+
+    .abuse-high .abuse-fill {
+      background: #ef4444;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 20px 0;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-top: 1px solid rgba(148, 163, 184, 0.1);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+
+    .toolbar-info {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-info::before {
+      content: '💡';
+    }
+
+    .toolbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .status-indicator {
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(14, 165, 233, 0.1);
+      border: 1px solid rgba(14, 165, 233, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-indicator::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #0ea5e9;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    /* Enhanced Table */
+    .table-wrapper {
+      margin-top: 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow-y: auto;
+      overflow-x: auto;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(8px);
+      max-height: 600px;
+      position: relative;
+    }
+
+
+    .table-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.5), transparent);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 12px;
+      table-layout: auto;
+    }
+
+    thead {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    th {
+      padding: 12px 14px;
+      border-bottom: 2px solid rgba(148, 163, 184, 0.3);
+      text-align: left;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 10px;
+      position: sticky;
+      top: 0;
+      background: inherit;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.8);
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+      transition: background 0.2s ease;
+    }
+
+    /* ISP column — allow more width but still truncate */
+    td.isp-cell {
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* IP Address — monospace, fixed min-width */
+    td.monospace {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      min-width: 130px;
+      max-width: 160px;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.92);
+    }
+
+    tbody tr:nth-child(odd) {
+      background: rgba(15, 23, 42, 0.86);
+    }
+
+    tbody tr:hover {
+      background: rgba(37, 99, 235, 0.35);
+      transform: translateX(4px);
+    }
+
+    tbody tr.active-row {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.8)) !important;
+      box-shadow: inset 4px 0 0 #3b82f6;
+    }
+
+    .status-ok {
+      color: #4ade80;
+      font-weight: 600;
+    }
+
+    .status-bad {
+      color: #f97373;
+      font-weight: 600;
+    }
+
+    /* Enhanced Detail panel */
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .detail-title {
+      font-size: 16px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #e5e7eb, #9ca3af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .detail-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tag-chip {
+      border-radius: 999px;
+      padding: 6px 14px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1.5px solid rgba(148, 163, 184, 0.4);
+      font-size: 11px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .tag-chip:hover {
+      transform: translateY(-1px);
+      border-color: rgba(148, 163, 184, 0.7);
+    }
+
+    .tag-chip-strong {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(59, 130, 246, 0.15));
+      border-color: rgba(59, 130, 246, 0.9);
+      color: #bfdbfe;
+      font-weight: 600;
+    }
+
+    .detail-grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 20px;
+      font-size: 12px;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .detail-item-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+
+    .detail-item-value {
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    /* Enhanced Badges */
+    .badge {
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: 1.5px solid transparent;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge::before {
+      content: '•';
+      font-size: 16px;
+    }
+
+    .badge-green {
+      background: rgba(22, 163, 74, 0.2);
+      border-color: rgba(34, 197, 94, 0.4);
+      color: #86efac;
+    }
+
+    .badge-yellow {
+      background: rgba(234, 179, 8, 0.15);
+      border-color: rgba(234, 179, 8, 0.4);
+      color: #fde047;
+    }
+
+    .badge-red {
+      background: rgba(248, 113, 113, 0.2);
+      border-color: rgba(248, 113, 113, 0.4);
+      color: #fca5a5;
+    }
+
+    .badge-blue {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.4);
+      color: #93c5fd;
+    }
+
+    /* ASN Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(2, 6, 23, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-container {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 32px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .modal-overlay.show .modal-container {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: -0.02em;
+    }
+
+    .modal-close {
+      cursor: pointer;
+      font-size: 28px;
+      color: #94a3b8;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: #f8fafc;
+    }
+
+    .asn-link {
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 1px dashed rgba(59, 130, 246, 0.4);
+      transition: all 0.2s;
+    }
+
+    .asn-link:hover {
+      color: #60a5fa;
+      border-bottom-style: solid;
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .asn-detail-item {
+      margin-bottom: 16px;
+    }
+
+    .asn-detail-label {
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .asn-detail-value {
+      font-size: 15px;
+      font-weight: 500;
+      color: #e2e8f0;
+    }
+
+    /* ASN Tabs Styles */
+    .asn-tabs-nav {
+      display: flex;
+      gap: 4px;
+      margin-top: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0px;
+      overflow-x: auto;
+    }
+
+    .asn-tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .asn-tab-btn:hover {
+      color: #e2e8f0;
+    }
+
+    .asn-tab-btn.active {
+      color: #3b82f6;
+    }
+
+    .asn-tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #3b82f6;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
+
+    .asn-tab-content {
+      padding: 20px 0;
+      min-height: 250px;
+    }
+
+    .whois-block {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      max-height: 300px;
+      overflow-y: auto;
+      color: #94a3b8;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .ix-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .ix-name {
+      color: #f8fafc;
+      font-weight: 600;
+    }
+
+    .ix-city {
+      color: #64748b;
+      font-size: 11px;
+    }
+
+    .asn-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #3b82f6;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 20px 0 10px 0;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .rpki-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      display: inline-block;
+    }
+
+    .rpki-valid {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+
+    .rpki-invalid {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .rpki-unknown {
+      background: rgba(148, 163, 184, 0.2);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    /* Enhanced Progress bar */
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(148, 163, 184, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 12px 0;
+      display: none;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #22c55e, #2563eb);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 2px;
+    }
+
+    /* Enhanced Print styles */
+    @page {
+      size: A4;
+      margin: 15mm;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        color: #111827;
+        font-size: 12px;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .shell {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .card {
+        box-shadow: none;
+        border-radius: 0;
+        border: 2px solid #111827;
+        background: #ffffff;
+        color: #111827;
+        margin: 0 0 20px;
+        page-break-inside: avoid;
+      }
+
+      .table-wrapper {
+        max-height: none;
+        overflow: visible;
+        border: 2px solid #111827;
+      }
+
+      table {
+        font-size: 10px;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        border: 1px solid #555;
+        padding: 8px;
+      }
+
+      .print-header {
+        display: block !important;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #111827;
+      }
+
+      .results-layout {
+        display: block;
+      }
+
+      .detail-panel {
+        page-break-before: always;
+      }
+    }
+
+    .print-header {
+      display: none;
+      font-size: 14px;
+    }
+
+    .print-header-title {
+      font-weight: 800;
+      font-size: 20px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .print-header-meta {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(148, 163, 184, 0.3);
+      border-radius: 50%;
+      border-top-color: #22c55e;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      padding: 16px 24px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      transform: translateX(400px);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 400px;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification.success {
+      border-left: 4px solid #22c55e;
+    }
+
+    .notification.error {
+      border-left: 4px solid #ef4444;
+    }
+
+    .notification.info {
+      border-left: 4px solid #3b82f6;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <!-- Enhanced Top bar -->
+    <div class="topbar no-print">
+      <div class="brand">
+        <div class="brand-logo"></div>
+        <div class="brand-text">
+          <div class="brand-title">IP INTELLIGENCE</div>
+          <div class="brand-subtitle">Advanced IPv4 & IPv6 Analytics Dashboard</div>
+        </div>
+      </div>
+      <div class="top-meta">
+        <div id="top-timestamp" class="ts"></div>
+      </div>
+    </div>
+
+    <!-- Print header -->
+    <div class="print-header">
+      <div class="print-header-title">IP Intelligence Report</div>
+      <div class="print-header-meta">
+        Generated at: <span id="print-timestamp"></span> |
+        Total IPs: <span id="print-total">0</span> |
+        Report ID: <span id="print-id">REPORT-${Date.now()}</span>
+      </div>
+    </div>
+
+    <!-- Enhanced Input card -->
+    <div class="card no-print">
+      <div class="card-header">
+        <div>
+          <div class="card-title">IP Intelligence Input</div>
+          <div class="card-subtitle">
+            Enter single IPs or bulk lists — Full IPv4/IPv6 support with advanced threat detection
+          </div>
+        </div>
+        <div style="font-size:12px; color:#9ca3af; display: flex; align-items: center; gap: 8px;">
+          <span>📝 One per line</span>
+          <span>•</span>
+          <span>📊 CSV supported</span>
+          <span>•</span>
+          <span>⚡ Real-time validation</span>
+        </div>
+      </div>
+
+      <label for="ip-textarea">IP Address List</label>
+      <textarea id="ip-textarea" placeholder="Examples:
+8.8.8.8        # Google DNS
+1.1.1.1        # Cloudflare DNS
+9.9.9.9        # Quad9 DNS
+2001:4860:4860::8888  # Google IPv6 DNS
+2606:4700:4700::1111  # Cloudflare IPv6"></textarea>
+
+      <!-- Progress bar -->
+      <div class="progress-bar no-print" id="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <div class="input-row">
+        <div class="file-wrapper">
+          <input id="csv-file" type="file" accept=".csv,.txt,.xlsx,.xls" />
+          <button type="button" class="file-btn" onclick="document.getElementById('csv-file').click()">
+            <i>📁</i> Choose File
+          </button>
+          <div id="csv-filename" class="file-name">No file chosen</div>
+        </div>
+        <div style="flex:1; color:#9ca3af; font-size:12px; line-height:1.5;">
+          Supports CSV, TXT, Excel. IPs auto-detected from any column.
+        </div>
+        <button class="secondary" onclick="clearInputs()" title="Clear all inputs">
+          <i>🗑️</i> Clear
+        </button>
+        <button class="primary" id="run-btn" onclick="runLookup()">
+          <i>🚀</i> Run Intelligence Lookup
+        </button>
+      </div>
+
+      <div id="input-error" class="error"></div>
+    </div>
+
+    <!-- Enhanced Results card -->
+    <div class="card" id="results-card" style="display:none;">
+      <!-- Enhanced Stats row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total IPs</div>
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-pill">Successfully Processed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Threats Detected</div>
+          <div class="stat-value" id="stat-vpn">0</div>
+          <div class="stat-pill">VPN / Proxy / Tor</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Infrastructure</div>
+          <div class="stat-value" id="stat-hosting">0</div>
+          <div class="stat-pill">Hosting & Datacenter</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Failures</div>
+          <div class="stat-value" id="stat-errors">0</div>
+          <div class="stat-pill">Invalid / Failed</div>
+        </div>
+      </div>
+
+      <!-- NEW: Visualization Row -->
+      <div class="viz-row">
+        <div class="viz-card map-container">
+          <div class="viz-card-header">
+            <span class="viz-card-title">Global IP Distribution</span>
+          </div>
+          <div id="map"></div>
+        </div>
+        <div class="viz-card chart-container">
+          <div class="viz-card-header">
+            <span class="viz-card-title">Threat & Privacy Analysis</span>
+          </div>
+          <canvas id="threatChart"></canvas>
+        </div>
+      </div>
+
+
+      <!-- Enhanced Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-info">
+          Click any row to view detailed intelligence analysis
+        </div>
+        <div class="toolbar-right">
+          <div class="status-indicator" id="summary-duration">
+            Processing time: <span id="duration-text">0s</span>
+          </div>
+          <div style="font-size:11px;color:#9ca3af;" id="last-run">
+            Last analysis: <span id="last-run-time">—</span>
+          </div>
+          <button class="secondary" onclick="downloadCSV()" title="Export as CSV">
+            <i>📊</i> Export CSV
+          </button>
+          <button class="secondary" onclick="downloadJSON()" title="Export as JSON">
+            <i>📁</i> Export JSON
+          </button>
+          <button class="primary" onclick="printReport()" title="Generate A4 Report">
+            <i>🖨️</i> Print Report
+          </button>
+        </div>
+      </div>
+
+      <!-- NEW: Live Filter Bar -->
+      <div class="filter-bar">
+        <input type="text" id="live-search" placeholder="Search by IP, Country, ISP..." onkeyup="filterResults()">
+        <select id="threat-filter" onchange="filterResults()">
+          <option value="all">All Threat Levels</option>
+          <option value="Clean">Clean</option>
+          <option value="VPN">VPN</option>
+          <option value="Proxy">Proxy</option>
+          <option value="Tor">Tor</option>
+          <option value="Hosting">Hosting</option>
+        </select>
+      </div>
+
+      <div class="results-layout">
+        <!-- Enhanced Table section -->
+        <div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th width="40px">#</th>
+                  <th width="120px">IP Address</th>
+                  <th width="60px">Version</th>
+                  <th width="90px">Country</th>
+                  <th width="80px">Region</th>
+                  <th width="80px">City</th>
+                  <th width="70px">Latitude</th>
+                  <th width="70px">Longitude</th>
+                  <th width="70px">ASN</th>
+                  <th>ISP / Organization</th>
+                  <th width="100px">Abuse Score</th>
+                  <th width="110px">Threat Level</th>
+                  <th width="80px">Status</th>
+                </tr>
+              </thead>
+              <tbody id="results-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Enhanced Detail panel -->
+        <div class="detail-panel" id="detail-panel" style="display:none;">
+          <div class="detail-header">
+            <div>
+              <div class="detail-title">IP Intelligence Details</div>
+              <div class="detail-tags" id="detail-tags"></div>
+            </div>
+            <button class="secondary" onclick="closeDetailPanel()" style="padding: 6px 12px; font-size: 12px;">
+              <i>✕</i> Close
+            </button>
+          </div>
+          <div id="detail-body" style="font-size:13px; color:#9ca3af;">
+            Select an IP from the table to view detailed intelligence analysis...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification container -->
+  <div id="notification-container"></div>
+
+  <div id="asn-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-title" id="asn-modal-title">ASN Information</div>
+        <div class="modal-close" onclick="closeAsnModal()">&times;</div>
+      </div>
+      <div id="asn-modal-body">
+        <div class="loading"></div>
+      </div>
+      <div style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 12px; color: #64748b;">Source: BGPView / RIPE</span>
+        <a id="bgp-link" href="#" target="_blank" class="asn-link" style="font-size: 13px;">View on BGP.he.net →</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Enhanced timestamp
+    function updateTopTimestamp() {
+      const el = document.getElementById('top-timestamp');
+      if (!el) return;
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-US', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+      const timeStr = now.toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      el.textContent = `${dateStr} · ${timeStr}`;
+    }
+
+    updateTopTimestamp();
+    setInterval(updateTopTimestamp, 1000);
+
+    // Enhanced data management
+    let uploadedIPs = [];
+    let lastResults = [];
+    let activeRowIndex = null;
+    let processing = false;
+    let map = null;
+    let mapMarkers = [];
+    let threatChart = null;
+
+   // Initialize Map
+function initMap() {
+    if (map) return;
+
+    map = L.map('map').setView([20, 0], 2);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+}
+
+    // Initialize/Update Charts
+    function updateCharts(results) {
+      const ctx = document.getElementById('threatChart').getContext('2d');
+      const stats = {
+        Clean: 0,
+        VPN: 0,
+        Proxy: 0,
+        Tor: 0,
+        Hosting: 0
+      };
+
+      results.forEach(r => {
+        if (!r.ok) return;
+        const sec = r.data.security || {};
+        if (sec.vpn) stats.VPN++;
+        else if (sec.proxy) stats.Proxy++;
+        else if (sec.tor) stats.Tor++;
+        else if (sec.hosting) stats.Hosting++;
+        else stats.Clean++;
+      });
+
+      if (threatChart) {
+        threatChart.data.datasets[0].data = Object.values(stats);
+        threatChart.update();
+      } else {
+        threatChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(stats),
+            datasets: [{
+              data: Object.values(stats),
+              backgroundColor: ['#22c55e', '#ef4444', '#f59e0b', '#8b5cf6', '#3b82f6'],
+              borderWidth: 0,
+              hoverOffset: 10
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { color: '#94a3b8', font: { family: 'Outfit', size: 10 } }
+              }
+            },
+            cutout: '70%'
+          }
+        });
+      }
+    }
+
+    // Update Map Markers
+    function updateMap(results) {
+      initMap();
+      mapMarkers.forEach(m => map.removeLayer(m));
+      mapMarkers = [];
+
+      const bounds = [];
+      results.forEach(r => {
+        if (r.ok && r.data.latitude && r.data.longitude) {
+          const m = L.circleMarker([r.data.latitude, r.data.longitude], {
+            radius: 6,
+            fillColor: r.data.security?.vpn ? '#ef4444' : '#22c55e',
+            color: '#fff',
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+          }).addTo(map).bindPopup(`<b>${r.ip}</b><br>${r.data.city}, ${r.data.country}`);
+          mapMarkers.push(m);
+          bounds.push([r.data.latitude, r.data.longitude]);
+        }
+      });
+
+      if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
+    }
+
+    // Filtering Logic
+    function filterResults() {
+      const query = document.getElementById('live-search').value.toLowerCase();
+      const threatType = document.getElementById('threat-filter').value;
+      const rows = document.querySelectorAll('#results-tbody tr');
+
+      rows.forEach(row => {
+        const idx = row.dataset.index;
+        const r = lastResults[idx];
+        if (!r) return;
+
+        const d = r.data || {};
+        const sec = d.security || {};
+
+        let threatLevel = 'Clean';
+        if (sec.vpn) threatLevel = 'VPN';
+        else if (sec.proxy) threatLevel = 'Proxy';
+        else if (sec.tor) threatLevel = 'Tor';
+        else if (sec.hosting) threatLevel = 'Hosting';
+
+        const matchesQuery =
+          r.ip.toLowerCase().includes(query) ||
+          (d.country || '').toLowerCase().includes(query) ||
+          (d.isp || '').toLowerCase().includes(query) ||
+          (d.city || '').toLowerCase().includes(query);
+
+        const matchesThreat = threatType === 'all' || threatLevel === threatType;
+
+        row.style.display = matchesQuery && matchesThreat ? '' : 'none';
+      });
+    }
+
+
+    // Enhanced file handling
+    document.getElementById('csv-file').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      const nameEl = document.getElementById('csv-filename');
+      const fileBtn = document.querySelector('.file-btn');
+      const fileWrapper = document.querySelector('.file-wrapper');
+
+      if (!file) {
+        nameEl.textContent = 'No file chosen';
+        if (fileBtn) {
+          fileBtn.classList.remove('active');
+          fileBtn.innerHTML = '<i>📁</i> Choose File';
+        }
+        if (fileWrapper) fileWrapper.classList.remove('active');
+        uploadedIPs = [];
+        return;
+      }
+
+      nameEl.textContent = file.name;
+      showNotification('File loaded successfully', 'success');
+
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        const text = evt.target.result || '';
+        uploadedIPs = parseIPsFromText(text);
+        nameEl.textContent = `${file.name} · ${uploadedIPs.length} IP(s) detected`;
+
+        if (fileBtn) {
+          fileBtn.classList.add('active');
+          fileBtn.innerHTML = '<i>✅</i> File Loaded';
+        }
+        if (fileWrapper) fileWrapper.classList.add('active');
+
+        if (uploadedIPs.length) {
+          const ta = document.getElementById('ip-textarea');
+          const existing = parseIPsFromText(ta.value || '');
+          const merged = Array.from(new Set([...existing, ...uploadedIPs]));
+          ta.value = merged.join('\n');
+          showNotification(`${uploadedIPs.length} IPs added from file`, 'success');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Enhanced IP parsing
+    function parseIPsFromText(text) {
+      const tokens = text.split(/[^0-9a-fA-F:\.]+/).map(t => t.trim()).filter(Boolean);
+      const seen = new Set();
+      const out = [];
+
+      function isIPv4(s) {
+        return /^((25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(25[0-5]|2[0-4]\d|1?\d?\d)$/.test(s);
+      }
+
+      function isIPv6(s) {
+        if (!s.includes(':')) return false;
+        if (!/^[0-9a-fA-F:\.]+$/.test(s)) return false;
+        if (s.length > 45) return false;
+        const parts = s.split(':');
+        if (parts.length > 8) return false;
+        for (const p of parts) {
+          if (p === '') continue;
+          if (p.length > 4) return false;
+          if (!/^[0-9a-fA-F]{1,4}$/.test(p)) return false;
+        }
+        return true;
+      }
+
+      for (const t of tokens) {
+        if (seen.has(t)) continue;
+        if (isIPv4(t) || isIPv6(t)) {
+          seen.add(t);
+          out.push(t);
+        }
+      }
+      return out;
+    }
+
+    // Enhanced input clearing
+    function clearInputs() {
+      document.getElementById('ip-textarea').value = '';
+      document.getElementById('csv-file').value = '';
+      document.getElementById('csv-filename').textContent = 'No file chosen';
+      uploadedIPs = [];
+      const fileBtn = document.querySelector('.file-btn');
+      const fileWrapper = document.querySelector('.file-wrapper');
+      if (fileBtn) {
+        fileBtn.classList.remove('active');
+        fileBtn.innerHTML = '<i>📁</i> Choose File';
+      }
+      if (fileWrapper) fileWrapper.classList.remove('active');
+      document.getElementById('input-error').textContent = '';
+      document.getElementById('input-error').classList.remove('show');
+      showNotification('All inputs cleared', 'info');
+    }
+
+    // Enhanced notification system
+    function showNotification(message, type = 'info') {
+      const container = document.getElementById('notification-container');
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+        <div style="font-weight:600; margin-bottom:4px;">
+          ${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}
+          ${type.charAt(0).toUpperCase() + type.slice(1)}
+        </div>
+        <div style="font-size:13px;">${message}</div>
+      `;
+      container.appendChild(notification);
+
+      setTimeout(() => notification.classList.add('show'), 10);
+
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // Enhanced progress bar
+    function updateProgress(percentage) {
+      const progressBar = document.getElementById('progress-bar');
+      const progressFill = document.getElementById('progress-fill');
+
+      if (percentage > 0) {
+        progressBar.style.display = 'block';
+        progressFill.style.width = `${percentage}%`;
+      } else {
+        // NEW: Brief delay for 'completion' feel before hiding
+        setTimeout(() => {
+          progressBar.style.display = 'none';
+          progressFill.style.width = '0%';
+        }, 500);
+      }
+    }
+
+    // Enhanced lookup with progress simulation
+    async function runLookup() {
+      if (processing) return;
+
+      const inputError = document.getElementById('input-error');
+      const runBtn = document.getElementById('run-btn');
+      const resultsCard = document.getElementById('results-card');
+      const tbody = document.getElementById('results-tbody');
+      const textarea = document.getElementById('ip-textarea');
+
+      inputError.textContent = '';
+      inputError.classList.remove('show');
+      resultsCard.style.display = 'none';
+      tbody.innerHTML = '';
+      lastResults = [];
+      activeRowIndex = null;
+      document.getElementById('detail-panel').style.display = 'none';
+
+      const ipsFromText = parseIPsFromText(textarea.value || '');
+      const allIPs = Array.from(new Set([...ipsFromText, ...uploadedIPs]));
+
+      if (!allIPs.length) {
+        inputError.textContent = '❌ Please provide at least one IP address';
+        inputError.classList.add('show');
+        return;
+      }
+
+      processing = true;
+      runBtn.disabled = true;
+      runBtn.innerHTML = '<div class="loading"></div> Processing...';
+
+      // Show initial progress
+      updateProgress(10);
+
+      try {
+        // Simulate progress for better UX
+        setTimeout(() => updateProgress(30), 300);
+        setTimeout(() => updateProgress(60), 600);
+
+        const startTime = Date.now();
+
+        const res = await fetch('/api/ip-bulk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ips: allIPs })
+        });
+
+        updateProgress(90);
+
+        const text = await res.text();
+        let data = null;
+
+        try {
+          if (text.trim()) {
+            data = JSON.parse(text);
+          }
+        } catch (pe) {
+          console.error('JSON parse error:', pe, text);
+          throw new Error(`Server response error: ${res.status}`);
+        }
+
+        if (!res.ok) {
+          const errMsg = data?.error || data?.message || `Server error ${res.status}`;
+          throw new Error(errMsg);
+        }
+
+        if (!data) {
+          throw new Error('Empty response from server');
+        }
+
+        lastResults = data.results || [];
+        updateProgress(100);
+
+        if (!lastResults.length) {
+          throw new Error('No results returned from server');
+        }
+
+        // Update stats
+        const successCount = lastResults.filter(r => r.ok).length;
+        const failCount = lastResults.filter(r => !r.ok).length;
+        let vpnCount = 0;
+        let hostingCount = 0;
+
+        lastResults.forEach(r => {
+          if (!r.ok) return;
+          const sec = (r.data && r.data.security) || {};
+          if (sec.vpn || sec.proxy || sec.tor) vpnCount++;
+          if (sec.hosting) hostingCount++;
+        });
+
+        document.getElementById('stat-total').textContent = data.count;
+        document.getElementById('stat-vpn').textContent = vpnCount;
+        document.getElementById('stat-hosting').textContent = hostingCount;
+        document.getElementById('stat-errors').textContent = failCount;
+
+        const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+        document.getElementById('duration-text').textContent = `${duration}s`;
+        document.getElementById('summary-duration').style.display = 'flex';
+
+        const now = new Date();
+        document.getElementById('print-timestamp').textContent = now.toLocaleString();
+        document.getElementById('print-total').textContent = data.count;
+        document.getElementById('last-run-time').textContent = now.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        // Fill table with enhanced styling
+        tbody.innerHTML = '';
+        lastResults.forEach((r, idx) => {
+          const d = r.data || {};
+          const tr = document.createElement('tr');
+          tr.dataset.index = idx;
+
+          const versionLabel = d.version === 6 ? 'IPv6' : d.version === 4 ? 'IPv4' : '';
+          const sec = d.security || {};
+
+          let threatLevel = 'Clean';
+          let badgeClass = 'badge badge-green';
+
+          if (sec.vpn) { threatLevel = 'VPN'; badgeClass = 'badge badge-red'; }
+          else if (sec.proxy) { threatLevel = 'Proxy'; badgeClass = 'badge badge-yellow'; }
+          else if (sec.tor) { threatLevel = 'Tor'; badgeClass = 'badge badge-red'; }
+          else if (sec.hosting) { threatLevel = 'Hosting'; badgeClass = 'badge badge-blue'; }
+
+          const cells = [
+            { type: 'text', value: idx + 1 },
+            { type: 'text', value: r.ip, cls: 'monospace' },
+            { type: 'text', value: versionLabel },
+            {
+              type: 'text',
+              value: `${d.country || '-'}${d.country_code ? ' (' + d.country_code + ')' : ''}`
+            },
+            { type: 'text', value: d.region || '-' },
+            { type: 'text', value: d.city || '-' },
+            { type: 'text', value: d.latitude != null ? d.latitude.toFixed(4) : '-' },
+            { type: 'text', value: d.longitude != null ? d.longitude.toFixed(4) : '-' },
+            {
+              type: 'html',
+              value: d.asn ? `<a href="#" class="asn-link" onclick="event.stopPropagation(); openAsnPopup('${d.asn}', '${r.ip}')">AS${d.asn}</a>` : '-'
+            },
+            {
+              type: 'text',
+              value: (d.isp && d.isp !== '-') ? d.isp : (d.org || '-'),
+              title: d.org || d.isp || '',
+              cls: 'isp-cell'
+            },
+
+            { type: 'abuse', value: r.ok ? null : 'n/a', id: `abuse-cell-${idx}` },
+            { type: 'badge', value: threatLevel, cls: badgeClass },
+            {
+              type: 'status',
+              value: r.ok ? 'OK' : (r.error || 'Error'),
+              cls: r.ok ? 'status-ok' : 'status-bad'
+            },
+          ];
+
+
+          cells.forEach((cell, cIdx) => {
+            const td = document.createElement('td');
+            if (cell.id) td.id = cell.id;
+
+            if (cell.type === 'abuse') {
+              // Abuse score — will be filled in async by fetchAbuseScores()
+              td.innerHTML = r.ok
+                ? `<span class="abuse-cell abuse-loading" data-ip="${r.ip}">⏳</span>`
+                : `<span class="abuse-cell abuse-na">—</span>`;
+            } else if (cell.type === 'badge') {
+              const span = document.createElement('span');
+              span.className = cell.cls;
+              span.textContent = cell.value;
+              td.appendChild(span);
+            } else if (cell.type === 'status') {
+              td.className = cell.cls;
+              td.textContent = cell.value;
+            } else if (cell.type === 'html') {
+              td.innerHTML = cell.value;
+              if (cell.cls) td.className = cell.cls;
+            } else {
+              td.textContent = cell.value;
+              if (cell.cls) td.className = cell.cls;
+              if (cell.title) td.title = cell.title;
+            }
+
+            tr.appendChild(td);
+          });
+
+
+          tr.addEventListener('click', () => selectRow(idx));
+          tr.addEventListener('dblclick', () => {
+            navigator.clipboard.writeText(r.ip);
+            showNotification(`Copied ${r.ip} to clipboard`, 'success');
+          });
+
+          tbody.appendChild(tr);
+        });
+
+        resultsCard.style.display = 'block';
+        showNotification(`Successfully processed ${data.count} IP addresses`, 'success');
+
+        // Auto-select first successful result
+        const firstSuccess = lastResults.findIndex(r => r.ok);
+        if (firstSuccess !== -1) {
+          setTimeout(() => selectRow(firstSuccess), 100);
+        }
+
+        // NEW: Update Visualizations
+        setTimeout(() => {
+          updateMap(lastResults);
+          updateCharts(lastResults);
+        }, 300);
+
+        // NEW: Fetch AbuseIPDB scores asynchronously
+        fetchAbuseScores(lastResults);
+
+      } catch (err) {
+
+
+        inputError.textContent = `❌ ${err.message}`;
+        inputError.classList.add('show');
+        showNotification(`Lookup failed: ${err.message}`, 'error');
+      } finally {
+        processing = false;
+        runBtn.disabled = false;
+        runBtn.innerHTML = '<i>🚀</i> Run Intelligence Lookup';
+        updateProgress(0);
+      }
+    }
+
+    // AbuseIPDB Score Fetcher
+    async function fetchAbuseScores(results) {
+      const goodIPs = results.filter(r => r.ok).map(r => r.ip);
+      if (!goodIPs.length) return;
+
+      try {
+        const res = await fetch('/api/abuse-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ips: goodIPs })
+        });
+
+        // If no key configured, scores just won't show (no crash)
+        // NEW: If key is missing (503) or other error, clear the loading state
+        if (!res.ok) {
+          const cells = document.querySelectorAll('.abuse-loading');
+          cells.forEach(cell => {
+            cell.textContent = '—';
+            cell.className = 'abuse-cell abuse-na';
+          });
+          return;
+        }
+        const data = await res.json();
+        if (!data.results) return;
+
+        data.results.forEach(({ ip, abuse }) => {
+          // NEW: Save to lastResults persistency
+          const resIdx = lastResults.findIndex(r => r.ip === ip);
+          if (resIdx !== -1) {
+            lastResults[resIdx].abuse = abuse;
+          }
+
+          // Update table cell
+          const cells = document.querySelectorAll(`.abuse-cell[data-ip="${CSS.escape(ip)}"]`);
+          cells.forEach(cell => {
+            if (!abuse) {
+              cell.textContent = '—';
+              cell.className = 'abuse-cell abuse-na';
+              return;
+            }
+            const score = abuse.abuseScore;
+            let cls = 'abuse-clean';
+            if (score >= 75) cls = 'abuse-high';
+            else if (score >= 25) cls = 'abuse-medium';
+
+            cell.innerHTML = `
+              <div class="abuse-score-wrap ${cls}">
+                <span class="abuse-score-num">${score}%</span>
+                <div class="abuse-bar"><div class="abuse-fill" style="width:${score}%"></div></div>
+              </div>`;
+            cell.className = 'abuse-cell';
+            cell.title = `Reports: ${abuse.totalReports} | Usage: ${abuse.usageType || 'N/A'}`;
+          });
+
+          // NEW: Update Threat Level Badge in table if score is high
+          const row = document.querySelector(`tr[data-index="${resIdx}"]`);
+          if (row && abuse.abuseScore >= 50) {
+            const threatBadge = row.querySelector('.badge');
+            if (threatBadge) {
+              threatBadge.textContent = 'High Risk';
+              threatBadge.className = 'badge badge-red';
+            }
+          }
+
+          // Also update detail panel if this IP is currently shown
+          const panel = document.getElementById('detail-panel');
+          if (panel.style.display !== 'none' && activeRowIndex !== null) {
+            const shownIP = lastResults[activeRowIndex]?.ip;
+            if (shownIP === ip) renderDetail(activeRowIndex);
+          }
+        });
+      } catch (e) {
+        // Silently fail — abuse scores are supplementary
+        console.warn('Abuse score fetch error:', e.message);
+      }
+    }
+
+    // Enhanced row selection
+    function selectRow(idx) {
+
+      const tbody = document.getElementById('results-tbody');
+      const panel = document.getElementById('detail-panel');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+
+      if (activeRowIndex === idx) {
+        closeDetailPanel();
+        return;
+      }
+
+      rows.forEach(r => r.classList.remove('active-row'));
+      const row = rows[idx];
+      if (row) row.classList.add('active-row');
+
+      activeRowIndex = idx;
+      panel.style.display = 'block';
+      renderDetail(idx);
+    }
+
+    function closeDetailPanel() {
+      const panel = document.getElementById('detail-panel');
+      const rows = document.querySelectorAll('#results-tbody tr');
+      rows.forEach(r => r.classList.remove('active-row'));
+      panel.style.display = 'none';
+      activeRowIndex = null;
+    }
+
+    // Enhanced detail rendering
+    function renderDetail(idx) {
+      const tagsEl = document.getElementById('detail-tags');
+      const bodyEl = document.getElementById('detail-body');
+      const entry = lastResults[idx];
+
+      tagsEl.innerHTML = '';
+      bodyEl.innerHTML = '';
+
+      if (!entry) {
+        bodyEl.innerHTML = '<div style="text-align:center; padding:40px; color:#9ca3af;">No data available</div>';
+        return;
+      }
+
+      if (!entry.ok) {
+        tagsEl.innerHTML = `
+          <span class="tag-chip tag-chip-strong">${entry.ip}</span>
+          <span class="tag-chip" style="background:rgba(239,68,68,0.2);border-color:#ef4444;color:#fca5a5;">Error</span>
+        `;
+
+        bodyEl.innerHTML = `
+          <div style="padding:20px; background:rgba(239,68,68,0.05); border-radius:12px; border:1px solid rgba(239,68,68,0.2);">
+            <div style="font-size:14px; color:#fca5a5; margin-bottom:8px;">⚠️ Lookup Failed</div>
+            <div style="font-size:13px; color:#fca5a5;">${entry.error || 'Unknown error occurred'}</div>
+          </div>
+        `;
+        return;
+      }
+
+      const d = entry.data || {};
+      const sec = d.security || {};
+
+      // Create tags
+      tagsEl.innerHTML = `
+        <span class="tag-chip tag-chip-strong">${d.ip || entry.ip}</span>
+        <span class="tag-chip">${d.version === 6 ? 'IPv6' : 'IPv4'}</span>
+        ${d.country_code ? `<span class="tag-chip">${d.country_code}</span>` : ''}
+        ${sec.vpn ? '<span class="tag-chip" style="background:rgba(239,68,68,0.2);border-color:#ef4444;color:#fca5a5;">VPN</span>' : ''}
+        ${sec.proxy ? '<span class="tag-chip" style="background:rgba(234,179,8,0.2);border-color:#eab308;color:#fde047;">Proxy</span>' : ''}
+        ${sec.hosting ? '<span class="tag-chip" style="background:rgba(59,130,246,0.2);border-color:#3b82f6;color:#93c5fd;">Hosting</span>' : ''}
+      `;
+
+      // Create detail grid
+      const euText = d.is_eu === true ? 'Yes' : d.is_eu === false ? 'No' : '-';
+      const threatLevel = sec.vpn ? 'High (VPN)' :
+        sec.proxy ? 'Medium (Proxy)' :
+          sec.hosting ? 'Low (Hosting)' :
+            'None (Clean)';
+
+      bodyEl.innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-item-label">Location</div>
+            <div class="detail-item-value">${[d.city, d.region, d.country].filter(Boolean).join(', ') || '-'}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">Coordinates</div>
+            <div class="detail-item-value">${d.latitude != null && d.longitude != null ?
+          `${d.latitude.toFixed(4)}, ${d.longitude.toFixed(4)}` : '-'}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">ISP / Organization</div>
+            <div class="detail-item-value">
+              ${(d.isp && d.isp !== '-') ? d.isp : (d.org || '-')}
+              ${(d.isp && d.isp !== '-' && d.org && d.org !== d.isp) ? `<br><small>${d.org}</small>` : ''}
+            </div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">Threat Assessment</div>
+            <div class="detail-item-value">${threatLevel}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">Network Details</div>
+            <div class="detail-item-value">
+              ${d.asn ? `<a href="#" class="asn-link" onclick="openAsnPopup('${d.asn}', '${d.ip}')">AS${d.asn}</a><br>` : ''}
+              ${d.postal ? `Postal: ${d.postal}<br>` : ''}
+              ${d.timezone ? `Timezone: ${d.timezone}` : ''}
+            </div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">Security Flags</div>
+            <div class="detail-item-value">
+              ${sec.vpn ? '✅ VPN<br>' : ''}
+              ${sec.proxy ? '✅ Proxy<br>' : ''}
+              ${sec.tor ? '✅ Tor<br>' : ''}
+              ${sec.hosting ? '✅ Hosting<br>' : ''}
+              ${sec.anonymous ? '✅ Anonymous' : 'No flags detected'}
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:24px; padding-top:16px; border-top:1px solid rgba(148,163,184,0.2);">
+          <div class="detail-item-label" style="margin-bottom:12px; color:#fca5a5;">🛡️ Abuse Intelligence (AbuseIPDB)</div>
+          ${entry.abuse ? `
+            <div class="detail-grid">
+              <div class="detail-item">
+                <div class="detail-item-label">Confidence Score</div>
+                <div class="detail-item-value" style="color:${entry.abuse.abuseScore > 50 ? '#fca5a5' : '#86efac'}">
+                  ${entry.abuse.abuseScore}%
+                </div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-item-label">Total Reports</div>
+                <div class="detail-item-value">${entry.abuse.totalReports}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-item-label">Usage Type</div>
+                <div class="detail-item-value">${entry.abuse.usageType || 'Unknown'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-item-label">Last Reported</div>
+                <div class="detail-item-value">${entry.abuse.lastReportedAt ? new Date(entry.abuse.lastReportedAt).toLocaleDateString() : 'Never'}</div>
+              </div>
+            </div>
+          ` : `
+            <div style="font-size:12px; color:#64748b; font-style:italic; padding:10px; background:rgba(255,255,255,0.03); border-radius:8px;">
+              Data Not Available (API Key may be missing or IP is white-listed)
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    // Enhanced CSV export
+    function downloadCSV() {
+      if (!lastResults.length) {
+        showNotification('No data available for export', 'error');
+        return;
+      }
+
+      const header = [
+        'IP', 'Version', 'Country', 'Region', 'City',
+        'Latitude', 'Longitude', 'ISP', 'Organization',
+        'ASN', 'Postal', 'Timezone', 'EU Member',
+        'VPN', 'Proxy', 'Tor', 'Hosting', 'Anonymous',
+        'Privacy Status', 'Lookup Status'
+      ];
+
+      const rows = [header];
+      lastResults.forEach(r => {
+        const d = r.data || {};
+        const sec = d.security || {};
+        rows.push([
+          r.ip,
+          d.version === 6 ? 'IPv6' : d.version === 4 ? 'IPv4' : '',
+          d.country || '',
+          d.region || '',
+          d.city || '',
+          d.latitude != null ? d.latitude : '',
+          d.longitude != null ? d.longitude : '',
+          d.isp || '',
+          d.org || '',
+          d.asn || '',
+          d.postal || '',
+          d.timezone || '',
+          d.is_eu === true ? 'Yes' : d.is_eu === false ? 'No' : '',
+          sec.vpn || false,
+          sec.proxy || false,
+          sec.tor || false,
+          sec.hosting || false,
+          sec.anonymous || false,
+          d.privacy_status || '',
+          r.ok ? 'SUCCESS' : 'FAILED'
+        ]);
+      });
+
+      const csvContent = rows.map(row =>
+        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+      ).join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ip_intelligence_report_${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showNotification('CSV report downloaded successfully', 'success');
+    }
+
+    // Enhanced JSON export
+    function downloadJSON() {
+      if (!lastResults.length) {
+        showNotification('No data available for export', 'error');
+        return;
+      }
+
+      const report = {
+        metadata: {
+          generated: new Date().toISOString(),
+          total: lastResults.length,
+          successful: lastResults.filter(r => r.ok).length,
+          failed: lastResults.filter(r => !r.ok).length
+        },
+        results: lastResults
+      };
+
+      const blob = new Blob(
+        [JSON.stringify(report, null, 2)],
+        { type: 'application/json;charset=utf-8;' }
+      );
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ip_intelligence_report_${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showNotification('JSON report downloaded successfully', 'success');
+    }
+
+    // Enhanced print functionality
+    function printReport() {
+      if (!lastResults.length) {
+        showNotification('No data available to print', 'error');
+        return;
+      }
+
+      document.getElementById('print-timestamp').textContent = new Date().toLocaleString();
+      document.getElementById('print-total').textContent = lastResults.length;
+      document.getElementById('print-id').textContent = `REPORT-${Date.now()}`;
+
+      setTimeout(() => {
+        window.print();
+        showNotification('Print dialog opened', 'info');
+      }, 100);
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Ctrl+Enter to run lookup
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        runLookup();
+      }
+
+      // Escape to close detail panel
+      if (e.key === 'Escape' && activeRowIndex !== null) {
+        closeDetailPanel();
+      }
+
+      // Arrow keys to navigate rows
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const rows = document.querySelectorAll('#results-tbody tr');
+        if (!rows.length) return;
+
+        let newIndex = activeRowIndex !== null ? activeRowIndex : -1;
+
+        if (e.key === 'ArrowDown') {
+          newIndex = Math.min(rows.length - 1, newIndex + 1);
+        } else if (e.key === 'ArrowUp') {
+          newIndex = Math.max(0, newIndex - 1);
+        }
+
+        if (newIndex !== activeRowIndex) {
+          selectRow(newIndex);
+          rows[newIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    });
+
+    // Auto-focus textarea on load
+    document.addEventListener('DOMContentLoaded', () => {
+      const textarea = document.getElementById('ip-textarea');
+      textarea.focus();
+
+      // Show welcome notification
+      setTimeout(() => {
+        showNotification('Welcome to IP Intelligence Dashboard. Enter IPs and click Run Lookup to begin.', 'info');
+      }, 1000);
+    });
+
+    // ─── ASN Modal Logic (Tabbed)
+    let currentAsnData = null;
+
+    async function openAsnPopup(asn, ip) {
+      const modal = document.getElementById('asn-modal');
+      const title = document.getElementById('asn-modal-title');
+      const body = document.getElementById('asn-modal-body');
+      const bgpLink = document.getElementById('bgp-link');
+
+      title.textContent = `AS${asn} Details`;
+      body.innerHTML = `
+        <div class="loading" style="margin: 40px auto;"></div>
+        <p style="text-align:center; color:#94a3b8; margin-top:10px;">Aggregating multi-point intelligence...</p>
+      `;
+      bgpLink.href = `https://bgp.he.net/AS${asn}`;
+
+      modal.style.display = 'flex';
+      setTimeout(() => modal.classList.add('show'), 10);
+
+      try {
+        const res = await fetch(`/api/asn/${asn}`);
+        if (!res.ok) throw new Error('Failed to fetch ASN data');
+        currentAsnData = await res.json();
+        renderAsnTab('overview');
+      } catch (err) {
+        body.innerHTML = `<div style="color:#f87171; padding:20px; text-align:center;">⚠️ ${err.message}</div>`;
+      }
+    }
+
+    function renderAsnTab(tab) {
+      const body = document.getElementById('asn-modal-body');
+      const data = currentAsnData;
+      if (!data) return;
+
+      const tabsHtml = `
+        <div class="asn-tabs-nav">
+          <button class="asn-tab-btn ${tab === 'overview' ? 'active' : ''}" onclick="renderAsnTab('overview')">Overview</button>
+          <button class="asn-tab-btn ${tab === 'infra' ? 'active' : ''}" onclick="renderAsnTab('infra')">Infrastructure</button>
+          <button class="asn-tab-btn ${tab === 'registry' ? 'active' : ''}" onclick="renderAsnTab('registry')">Registry / Whois</button>
+          <button class="asn-tab-btn ${tab === 'ix' ? 'active' : ''}" onclick="renderAsnTab('ix')">Internet Exchange</button>
+        </div>
+        <div class="asn-tab-content" id="asn-tab-pane">
+      `;
+
+      let content = '';
+      switch (tab) {
+        case 'overview':
+          const rpkiClass = data.rpki === 'valid' ? 'rpki-valid' : data.rpki === 'invalid' ? 'rpki-invalid' : 'rpki-unknown';
+          content = `
+            <div class="asn-detail-item">
+              <div class="asn-detail-label">Official Organization</div>
+              <div class="asn-detail-value" style="font-size: 18px; color: #f8fafc; font-weight: 800;">${data.name || 'Unknown'}</div>
+            </div>
+            <div class="asn-section-title">Security & Operational Status</div>
+            <div class="asn-detail-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <div class="asn-detail-item">
+                <div class="asn-detail-label">RPKI Health</div>
+                <div class="asn-detail-value"><span class="rpki-badge ${rpkiClass}">${data.rpki}</span></div>
+              </div>
+              <div class="asn-detail-item">
+                <div class="asn-detail-label">Announced</div>
+                <div class="asn-detail-value">${data.announced ? '<span style="color:#4ade80">✅ Active</span>' : '<span style="color:#94a3b8">❌ Inactive</span>'}</div>
+              </div>
+            </div>
+            <div class="asn-section-title">Geographic Information</div>
+            <div class="asn-detail-item">
+              <div class="asn-detail-label">Origin Country</div>
+              <div class="asn-detail-value">${data.country || 'Unknown'}</div>
+            </div>
+          `;
+          break;
+
+        case 'infra':
+          content = `
+            <div class="asn-section-title">Prefix Distribution</div>
+            <div class="asn-detail-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <div class="asn-detail-item">
+                <div class="asn-detail-label">Total Prefixes</div>
+                <div class="asn-detail-value" style="font-size:24px; color:#3b82f6;">${data.prefixes || 0}</div>
+              </div>
+              <div class="asn-detail-item">
+                <div class="asn-detail-label">V4 / V6 Split</div>
+                <div class="asn-detail-value">
+                  <div style="font-size:12px; color:#94a3b8;">IPv4: <span style="color:#e2e8f0">${data.prefix_v4}</span></div>
+                  <div style="font-size:12px; color:#94a3b8;">IPv6: <span style="color:#e2e8f0">${data.prefix_v6}</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="asn-section-title">BGP Connectivity</div>
+            <div class="asn-detail-item">
+              <div class="asn-detail-label">Observed Neighbors (Peers)</div>
+              <div class="asn-detail-value" style="font-size:20px; color:#f8fafc;">${data.peers || 0}</div>
+              <p style="font-size:11px; color:#64748b; margin-top:4px;">Indicates the complexity and reach of the AS network.</p>
+            </div>
+          `;
+          break;
+
+        case 'registry':
+          content = `
+            <div class="asn-section-title">IRR / WHOIS Database</div>
+            <pre class="whois-block">${data.whois || 'No WHOIS record found for this resource.'}</pre>
+            <div style="font-size:10px; color:#475569; margin-top:8px;">* Extracted from RIPEstat WHOIS database records.</div>
+          `;
+          break;
+
+        case 'ix':
+          content = `
+            <div class="asn-section-title">Internet Exchange Presence</div>
+            <div class="ix-container">
+              ${data.ixp_list && data.ixp_list.length ? data.ixp_list.map(ix => `
+                <div class="ix-item">
+                  <div class="ix-name">${ix.name}</div>
+                  <div class="ix-city">${ix.city || ''} ${ix.country || ''}</div>
+                </div>
+              `).join('') : '<p style="color:#64748b; font-size:13px; text-align:center; padding:20px;">No IX presence detected.</p>'}
+            </div>
+            <div style="font-size:11px; color:#475569; margin-top:10px;">Total IXPs: ${data.ixp_count || 0}</div>
+          `;
+          break;
+      }
+
+      body.innerHTML = tabsHtml + content + `
+        </div>
+        <div style="font-size:10px; color:#475569; margin-top:10px; text-align:right; font-style:italic; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
+          Intelligence Source: ${data.source}
+        </div>
+      `;
+    }
+
+    function closeAsnModal() {
+      const modal = document.getElementById('asn-modal');
+      modal.classList.remove('show');
+      setTimeout(() => modal.style.display = 'none', 300);
+    }
+
+    // Close modal on outside click
+    window.onclick = function (event) {
+      const modal = document.getElementById('asn-modal');
+      if (event.target == modal) closeAsnModal();
+    }
+  </script>
+</body>
+
+</html>

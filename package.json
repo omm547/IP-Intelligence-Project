@@ -1,0 +1,14 @@
+{
+  "name": "ip-lookup-node",
+  "version": "1.0.0",
+  "description": "IP bulk lookup - Node.js replacement for Flask backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.7"
+  }
+}
